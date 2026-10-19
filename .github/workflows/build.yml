@@ -1,0 +1,91 @@
+name: build
+
+on:
+  push:
+    branches: [main, master]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Package Chrome + Firefox
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Check JavaScript syntax
+        run: |
+          for file in src/shaders.js src/renderer.js src/content.js popup/popup.js tools/build.mjs; do
+            node --check "$file"
+          done
+
+      - name: Build packages
+        run: node tools/build.mjs
+
+      - name: Lint Firefox package
+        run: npx --yes web-ext@10.8.0 lint --source-dir dist/firefox --output text
+
+      - name: Shader smoke test
+        continue-on-error: true
+        run: |
+          google-chrome --headless=new --no-sandbox --disable-dev-shm-usage \
+            --enable-unsafe-swiftshader --use-gl=angle --use-angle=swiftshader \
+            --virtual-time-budget=4000 --dump-dom \
+            "file://$PWD/tools/test-harness.html" > /tmp/harness.html
+          python3 - <<'PY'
+          import html, json, re, sys
+
+          text = html.unescape(open('/tmp/harness.html').read())
+          match = re.search(r'data-cathode-result="(\{.*?\})"', text)
+          if not match:
+              sys.exit('shader harness: no result found')
+
+          result = json.loads(match.group(1))
+          print(json.dumps(result, indent=2))
+          sys.exit(0 if result.get('pass') else 1)
+          PY
+
+      - name: Upload packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: cathode-packages
+          path: |
+            dist/cathode-chrome-*.zip
+            dist/cathode-firefox-*.zip
+          if-no-files-found: error
+
+  release:
+    name: Publish release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download packages
+        uses: actions/download-artifact@v4
+        with:
+          name: cathode-packages
+          path: dist
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" dist/*.zip \
+            --title "Cathode $GITHUB_REF_NAME" \
+            --generate-notes

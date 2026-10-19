@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cathode</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="app" id="app">
+    <header class="header">
+      <div class="brand">
+        <svg class="brand-mark" viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="2.25" y="3.75" width="19.5" height="14" rx="2.2"></rect>
+          <path d="M9.5 21h5"></path>
+          <path d="M12 17.75V21"></path>
+          <path d="M6.25 8.25h1.5"></path>
+          <path d="M6.25 11h1.5"></path>
+        </svg>
+        <div class="brand-text">
+          <h1>Cathode</h1>
+          <span>CRT for YouTube</span>
+        </div>
+      </div>
+
+      <label class="switch" title="Enable Cathode (Alt+C)">
+        <input id="enabled" type="checkbox" aria-label="Enable Cathode">
+        <span class="track" aria-hidden="true"><span class="thumb"></span></span>
+      </label>
+    </header>
+
+    <section class="panel">
+      <div class="section-label">Preset</div>
+      <div class="presets" id="presets">
+        <button type="button" data-preset="subtle">Subtle</button>
+        <button type="button" data-preset="classic">Classic</button>
+        <button type="button" data-preset="arcade">Arcade</button>
+        <button type="button" data-preset="vapor">Vapor</button>
+        <button type="button" data-preset="terminal">Terminal</button>
+      </div>
+    </section>
+
+    <section class="panel panel--tight">
+      <div class="section-label">Phosphor</div>
+      <div class="segmented" id="phosphor">
+        <button type="button" data-phosphor="color">Color</button>
+        <button type="button" data-phosphor="green">Green</button>
+        <button type="button" data-phosphor="amber">Amber</button>
+      </div>
+    </section>
+
+    <main class="controls" id="controls" aria-label="Shader settings"></main>
+
+    <footer class="footer">
+      <span class="hint"><kbd>Alt</kbd><span class="plus">+</span><kbd>C</kbd> toggle</span>
+      <span class="version" id="version"></span>
+      <button id="reset" class="reset" type="button">Reset</button>
+    </footer>
+  </div>
+
+  <script src="../src/shaders.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

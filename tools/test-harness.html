@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Cathode shader test</title>
+  <style>
+    body { margin: 0; background: #111; color: #9f9; font: 12px monospace; }
+    #player { position: relative; width: 640px; height: 360px; }
+  </style>
+</head>
+<body>
+  <div class="html5-video-player" id="player"></div>
+  <canvas id="source" width="320" height="180" style="display:none"></canvas>
+  <pre id="out">pending</pre>
+
+  <script src="../src/shaders.js"></script>
+  <script src="../src/renderer.js"></script>
+  <script>
+    (() => {
+      const results = {};
+
+      try {
+        const source = document.getElementById('source');
+        const ctx = source.getContext('2d');
+
+        ctx.fillStyle = '#141414';
+        ctx.fillRect(0, 0, 320, 180);
+        ctx.fillStyle = '#ff3b30';
+        ctx.fillRect(0, 0, 160, 90);
+        ctx.fillStyle = '#34c759';
+        ctx.fillRect(160, 0, 160, 90);
+        ctx.fillStyle = '#0a84ff';
+        ctx.fillRect(0, 90, 160, 90);
+        ctx.fillStyle = '#ffd60a';
+        ctx.fillRect(160, 90, 160, 90);
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(160, 90, 34, 0, Math.PI * 2);
+        ctx.fill();
+
+        source.videoWidth = 320;
+        source.videoHeight = 180;
+        source.readyState = 4;
+        Object.defineProperty(source, 'paused', { value: true });
+        Object.defineProperty(source, 'ended', { value: true });
+
+        const player = document.getElementById('player');
+        const settings = Cathode.sanitize({
+          ...Cathode.DEFAULTS,
+          ...Cathode.PRESETS.classic,
+          preset: 'classic'
+        });
+
+        const renderer = new Cathode.Renderer(source, player, settings);
+        let shaderError = null;
+        renderer.onError = (error) => { shaderError = error.message; };
+        renderer.init();
+        renderer.setSettings(settings);
+        renderer._draw();
+
+        const gl = renderer.gl;
+        const canvas = renderer.canvas;
+        const w = canvas.width;
+        const h = canvas.height;
+        const pixels = new Uint8Array(w * h * 4);
+        gl.readPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+
+        const luma = (x, y) => {
+          const i = (y * w + x) * 4;
+          return (pixels[i] * 0.2126 + pixels[i + 1] * 0.7152 + pixels[i + 2] * 0.0722) / 255;
+        };
+        const rgb = (x, y) => {
+          const i = (y * w + x) * 4;
+          return [pixels[i], pixels[i + 1], pixels[i + 2]];
+        };
+
+        results.canvas = `${w}x${h}`;
+        results.error = shaderError;
+        results.center = luma(Math.floor(w / 2), Math.floor(h / 2));
+        results.corner = luma(1, 1);
+
+        let min = 1;
+        let max = 0;
+        for (let y = Math.floor(h * 0.3); y < Math.floor(h * 0.7); y++) {
+          const l = luma(Math.floor(w * 0.25), y);
+          min = Math.min(min, l);
+          max = Math.max(max, l);
+        }
+        results.scanlineContrast = max - min;
+
+        renderer.setSettings(
+          Cathode.sanitize({
+            ...Cathode.DEFAULTS,
+            ...Cathode.PRESETS.terminal,
+            preset: 'terminal'
+          })
+        );
+        renderer._draw();
+        gl.readPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+        const [r, g, b] = rgb(Math.floor(w / 2), Math.floor(h / 2));
+        results.terminal = { r, g, b, greenDominant: g > r && g > b };
+
+        results.pass =
+          !shaderError &&
+          results.center > 0.15 &&
+          results.corner < 0.02 &&
+          results.scanlineContrast > 0.01 &&
+          results.terminal.greenDominant;
+
+        renderer.destroy();
+      } catch (error) {
+        results.error = String(error && error.stack ? error.stack : error);
+        results.pass = false;
+      }
+
+      document.getElementById('out').textContent = JSON.stringify(results, null, 2);
+      document.body.dataset.cathodeResult = JSON.stringify(results);
+    })();
+  </script>
+</body>
+</html>

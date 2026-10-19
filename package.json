@@ -1,0 +1,14 @@
+{
+  "name": "cathode",
+  "version": "1.0.0",
+  "private": true,
+  "description": "CRT shaders for the YouTube player",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "node tools/build.mjs",
+    "icons": "python3 tools/make-icons.py",
+    "lint:firefox": "npx --yes web-ext@10.8.0 lint --source-dir dist/firefox"
+  }
+}
