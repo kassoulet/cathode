@@ -126,6 +126,36 @@ git tag v1.0.0
 git push origin v1.0.0
 ```
 
+## Releasing to the stores
+
+1. Bump `version` in `manifest.json` and `package.json` (the stores reject a
+   version they already have).
+2. Tag and push (`git tag vX.Y.Z && git push origin vX.Y.Z`). CI builds, lints, and
+   attaches `cathode-chrome-vX.Y.Z.zip` and `cathode-firefox-vX.Y.Z.zip` to the
+   GitHub release. Or run `node tools/build.mjs` locally and use `dist/*.zip`.
+3. Upload the matching archive:
+
+| Store | Archive | Where |
+| --- | --- | --- |
+| Chrome Web Store (also usable for Edge via Partner Center) | `cathode-chrome-*.zip` | [Developer Dashboard](https://chrome.google.com/webstore/devconsole) — one-time registration fee, then **New item** / **Package** → upload |
+| Firefox Add-ons (AMO) | `cathode-firefox-*.zip` | [Developer Hub](https://addons.mozilla.org/developers/) → **Submit a New Add-on** (listed) or **Upload** a new version |
+
+Listing details to prepare:
+
+- Icon: `icons/icon128.png`. Screenshots: 1280×800 (Chrome) / any size (AMO),
+  e.g. the same video with the effect on and off.
+- Permissions justification: `storage` saves your settings; the
+  `*://*.youtube.com/*` host permission is needed to draw over the YouTube player.
+- Privacy: nothing is collected or sent anywhere (the Firefox manifest declares
+  `data_collection_permissions: none`). Answer the store's data-use form with "no
+  data collected".
+- Firefox: the add-on ID `cathode@cathode.app` in the generated manifest must stay
+  the same across versions. AMO reviews listed add-ons; to self-host a signed build
+  instead, use `npx web-ext sign --channel=unlisted --source-dir dist/firefox`
+  with your AMO API key and secret.
+
+Publishing is manual; nothing in CI uploads to the stores.
+
 ## Layout
 
 ```
