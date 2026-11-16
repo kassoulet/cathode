@@ -151,7 +151,7 @@ void main ()
 	col = bleed ( uv );
 	col = srgbToLinear ( col );
 	col = reduceBlue ( col );
-	col = scanlines ( col, uv.y * textureSize ( iChannel0, 0 ).y );
+	col = scanlines ( col, uv.y * float ( textureSize ( iChannel0, 0 ).y ) );
 	col = shadowMask ( col, fragCoord );
 	col = phosphorDecay ( col );
 

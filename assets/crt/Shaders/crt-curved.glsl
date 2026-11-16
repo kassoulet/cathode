@@ -119,7 +119,7 @@ vec3 gausBlurWebcam ( sampler2D textY, sampler2D textUV, vec2 uv, float radius )
 {
 	float	lod = log2 ( max ( 1.0, radius * 5.0 ) );
 
-	vec2	currentTexSize = textureSize ( textY, int ( lod ) );
+	vec2	currentTexSize = vec2 ( textureSize ( textY, int ( lod ) ) );
 	vec2	texelSize = 1.0 / vec2 ( currentTexSize );
 	float	fractionalRadius = fract ( lod ) + 1.0;
 	vec2	scale = texelSize * fractionalRadius;

@@ -13,7 +13,7 @@ uniform float	decNoise			= 0.1;	// 0 = perfect, 1 = total breakup
 
 vec3 decGetCrosstalk ( vec3 signal, vec2 uv, sampler2D tex )
 {
-	float	texH = textureSize ( tex, 0 ).y;
+	float	texH = float ( textureSize ( tex, 0 ).y );
 
 	float	drift = ( decRandom_v2_f ( vec2 ( 0.0 ), iTime * 0.1 ) - 0.5 );
 	float	chroma_phase = iTime * crtRefreshRate * 0.5 * PI + drift;
@@ -39,7 +39,7 @@ vec3 decGetCrosstalk ( vec3 signal, vec2 uv, sampler2D tex )
 float getAnalogDefects ( int texH )
 {
 	// Apply phase offset with "live" jitter and drift
-	float	srcLine  = floor ( fragCoord.y * texH );
+	float	srcLine  = floor ( fragCoord.y * float ( texH ) );
 	float	lineSign = ( mod ( srcLine, 2.0 ) < 1.0 ) ? 1.0 : -1.0;
 
 	float	drift  = sin ( iTime * 1.5 + srcLine * 0.3 ) * decDrift * 6.0;
@@ -65,7 +65,7 @@ void main ()
 
 	// Two complete, independent signal lines
 	vec3	here = getSignal ( fragCoord, angle, rollOffset );
-	vec3	prev = getSignal ( fragCoord - vec2 ( 0.0, 1.0 / texH ), -angle, rollOffset );
+	vec3	prev = getSignal ( fragCoord - vec2 ( 0.0, 1.0 / float ( texH ) ), -angle, rollOffset );
 
 	// PAL delay-line: average adjacent lines' rotated chroma. The +/-22.5°
 	// rotations cancel back to true hue. Full average = clean; none = Hanover

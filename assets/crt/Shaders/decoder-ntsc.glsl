@@ -20,7 +20,7 @@ uniform float	decNoise			= 0.1;	// 0 = perfect, 1 = total breakup
 //
 vec3 decGetCrosstalk ( vec3 signal, vec2 uv, sampler2D tex )
 {
-	float	texH = textureSize ( tex, 0 ).y;
+	float	texH = float ( textureSize ( tex, 0 ).y );
 
 	// dot-crawl phase (per-line sign -0.5 -> correct upward diagonal crawl)
 	float	chroma_phase = iTime * crtRefreshRate * 0.5 * PI;
@@ -73,7 +73,7 @@ float getAnalogDefects ( int texH )
 	float	slowDrift = sin ( iTime * 0.04 ) * decDrift * 10.0;
 
 	// Tiny fast component from signal instability
-	float	srcLine  = floor ( fragCoord.y * texH );
+	float	srcLine  = floor ( fragCoord.y * float ( texH ) );
 	float	microJitter = ( decRandom_v2_f ( vec2 ( 0.0, srcLine ), iTime ) - 0.5 ) * decDrift * 10.0;
 
 	return radians ( slowDrift + microJitter );

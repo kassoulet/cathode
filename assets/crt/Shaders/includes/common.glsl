@@ -93,7 +93,7 @@ const float decChromaFilter[DEC_FILTER_KERNEL] = float[DEC_FILTER_KERNEL](0.001,
 vec3 decGetBlurredSignal ( vec2 uv, sampler2D tex )
 {
 	// chroma sub-sampling
-	vec4	lumaChromaDelta = vec4 ( 1.0 / textureSize ( tex, 0 ).x ) * vec4 ( decSharpening, decLumablur, decChromablur, decChromablur );
+	vec4	lumaChromaDelta = vec4 ( 1.0 / float ( textureSize ( tex, 0 ).x ) ) * vec4 ( decSharpening, decLumablur, decChromablur, decChromablur );
 
 	vec3	lumaChroma = vec3 ( 0.0 );
 	for ( int i = 0; i < DEC_FILTER_KERNEL; i++ )
