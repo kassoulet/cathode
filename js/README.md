@@ -46,3 +46,13 @@ the package.
 ## Demo
 
 `npm run demo`, then open <http://localhost:8080/js/demo/>.
+
+## Comparison app
+
+`npm install && npm run demo`, then open <http://localhost:8080/js/compare/>.
+It renders the same example image (or an uploaded one) with `crt-canvas` and the
+[`crt-shader`](https://www.npmjs.com/package/crt-shader) npm package side by
+side, with every setting of both libraries exposed, plus PNG export and
+"copy settings" as JSON. `crt-shader` is a still-image renderer, so it is not
+re-rendered per frame and has no video input. The example images are generated
+by `compare/images/generate.py`.
