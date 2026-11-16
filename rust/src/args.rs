@@ -197,11 +197,13 @@ impl Args {
             candidates.push(dir.clone());
         }
         candidates.push(PathBuf::from("assets/crt"));
+        candidates.push(PathBuf::from("../assets/crt"));
+        candidates.push(PathBuf::from("../../assets/crt"));
         if let Ok(exe) = std::env::current_exe() {
             let dir = exe.parent().unwrap_or(Path::new(".")).to_path_buf();
             candidates.push(dir.join("assets/crt"));
-            candidates.push(dir.join("../share/crtplayer/assets/crt"));
             candidates.push(dir.join("../assets/crt"));
+            candidates.push(dir.join("../share/crtplayer/assets/crt"));
         }
 
         for candidate in candidates {
