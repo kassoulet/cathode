@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>crt-canvas demo</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        font: 14px/1.4 ui-sans-serif, system-ui, sans-serif;
+        background: #0b0d10;
+        color: #d7dde5;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 300px;
+        gap: 20px;
+        padding: 20px;
+      }
+      h1 {
+        margin: 0 0 12px;
+        font-size: 15px;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+      }
+      #screen {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 0;
+        background: #05060800;
+      }
+      canvas {
+        width: 100%;
+        max-height: calc(100vh - 40px);
+        aspect-ratio: 4 / 3;
+        border-radius: 6px;
+        background: #000;
+        box-shadow: 0 0 0 1px #ffffff12;
+      }
+      aside {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        padding: 16px;
+        border: 1px solid #ffffff12;
+        border-radius: 8px;
+        background: #11151a;
+        height: fit-content;
+      }
+      label {
+        display: grid;
+        gap: 6px;
+        font-size: 12px;
+        color: #98a4b3;
+      }
+      select,
+      input[type="file"] {
+        width: 100%;
+        padding: 7px 8px;
+        border-radius: 6px;
+        border: 1px solid #ffffff1c;
+        background: #0b0f14;
+        color: inherit;
+        font: inherit;
+      }
+      input[type="range"] {
+        width: 100%;
+        accent-color: #7cc4ff;
+      }
+      .row {
+        display: flex;
+        gap: 8px;
+      }
+      button {
+        flex: 1;
+        padding: 8px 10px;
+        border-radius: 6px;
+        border: 1px solid #ffffff1c;
+        background: #1a2028;
+        color: inherit;
+        font: inherit;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #232b35;
+      }
+      .check {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        color: #d7dde5;
+      }
+      #status {
+        font: 12px/1.5 ui-monospace, monospace;
+        color: #748194;
+        white-space: pre-line;
+      }
+      @media (max-width: 860px) {
+        body {
+          grid-template-columns: 1fr;
+        }
+        canvas {
+          max-height: 60vh;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main id="screen">
+      <canvas id="crt" width="960" height="720"></canvas>
+    </main>
+
+    <aside>
+      <h1>crt-canvas</h1>
+
+      <label>
+        Preset
+        <select id="preset"></select>
+      </label>
+
+      <label>
+        Shadow mask
+        <select id="mask"></select>
+      </label>
+
+      <label>
+        Signal
+        <select id="analog">
+          <option value="off">RGB (clean)</option>
+          <option value="pal">PAL (YUV)</option>
+          <option value="ntsc">NTSC (YIQ)</option>
+        </select>
+      </label>
+
+      <label>Curve <input id="curve" type="range" min="0" max="100" value="25" /></label>
+      <label>Scanlines <input id="scanlines" type="range" min="0" max="100" value="35" /></label>
+      <label>Mask intensity <input id="maskIntensity" type="range" min="0" max="100" value="25" /></label>
+      <label>Vignette <input id="vignette" type="range" min="0" max="100" value="50" /></label>
+      <label>Noise <input id="noise" type="range" min="0" max="100" value="10" /></label>
+      <label>Phosphor decay <input id="decay" type="range" min="0" max="100" value="60" /></label>
+
+      <label class="check">
+        <input id="reflection" type="checkbox" checked />
+        Glass reflection
+      </label>
+
+      <label>
+        Use a video file
+        <input id="file" type="file" accept="video/*" />
+      </label>
+
+      <div class="row">
+        <button id="snapshot">Snapshot</button>
+        <button id="reset">Reset</button>
+      </div>
+
+      <div id="status"></div>
+    </aside>
+
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>

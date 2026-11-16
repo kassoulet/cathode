@@ -1,0 +1,34 @@
+{
+  "name": "crt-canvas",
+  "version": "0.1.0",
+  "description": "WebGL2 CRT emulation for a canvas, using the Toddler-Boy/CRTEmulation-Data shaders",
+  "type": "module",
+  "main": "./src/index.js",
+  "module": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./presets": "./src/presets.js"
+  },
+  "files": [
+    "src",
+    "assets",
+    "README.md"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "demo": "node scripts/serve.mjs",
+    "sync-assets": "node scripts/sync-assets.mjs",
+    "prepack": "node scripts/sync-assets.mjs"
+  },
+  "keywords": [
+    "crt",
+    "webgl",
+    "webgl2",
+    "canvas",
+    "shader",
+    "retro",
+    "scanlines",
+    "phosphor"
+  ],
+  "license": "MIT"
+}
