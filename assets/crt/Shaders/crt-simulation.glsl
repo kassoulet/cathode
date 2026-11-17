@@ -79,6 +79,11 @@ vec3 scanlines ( vec3 col, float y )
 
 uniform float	crtMask = 0.5;
 
+// Mask tiles across the quad (x, y). 0 = legacy fixed density. A host passes
+// sourceSize * texelsPerPixel / maskSize to size the mask relative to the
+// source pixels instead.
+uniform vec2	crtMaskRepeats = vec2 ( 0.0 );
+
 vec3 shadowMask ( vec3 col, vec2 uv )
 {
 	// 64px is the reference mask size, a larger bitmap renders proportionally
@@ -86,7 +91,7 @@ vec3 shadowMask ( vec3 col, vec2 uv )
 	const vec2	refSize = vec2 ( 64.0 * 64.0 * 0.75 );
 
 	vec2	texSize = vec2 ( textureSize ( iChannel1, 0 ).xy );
-	vec2	repeats = refSize / texSize;
+	vec2	repeats = crtMaskRepeats.x > 0.0 ? crtMaskRepeats : refSize / texSize;
 	vec3	mask = texture ( iChannel1, uv * repeats ).rgb;
 	mask = srgbToLinear ( mask );
 

@@ -9,7 +9,6 @@ import {
   createTexture,
   flipRows,
   readPixels,
-  uploadCanvas,
   uploadImage,
 } from "./gl.js";
 import {
@@ -20,6 +19,10 @@ import {
 import { ENCODER_SHADER, VERTEX, VERTEX_ROTATED } from "./shaders.js";
 
 const TEXTURE_2D = 0x0de1;
+
+// The shipped masks hold 8 RGB triads per 64 texels, so 8 texels per source
+// pixel makes one triad as wide as one input pixel.
+const MASK_TEXELS_PER_PIXEL = 8;
 
 function even(value) {
   const v = Math.round(value);
@@ -158,24 +161,11 @@ export class CRT {
     }
     if (this.mask) gl.deleteTexture(this.mask.texture);
 
-    const w = image.naturalWidth;
-    const h = image.naturalHeight;
-    const scale = Math.max(1, Math.floor(512 / Math.max(1, w)));
-    const tw = w * scale;
-    const th = h * scale;
-
-    const canvas = document.createElement("canvas");
-    canvas.width = tw;
-    canvas.height = th;
-    const ctx = canvas.getContext("2d");
-    ctx.imageSmoothingEnabled = false;
-    // The repo ships 64 px masks; detailFade() would hide them at CRT
-    // resolution, so scale each mask pixel up (tiling is handled by REPEAT).
-    ctx.drawImage(image, 0, 0, tw, th);
-
+    // Native-size bitmap, tiled by the shader so one triad spans one source
+    // pixel (see crtMaskRepeats).
     this.mask = createTexture(gl, {
-      width: tw,
-      height: th,
+      width: image.naturalWidth,
+      height: image.naturalHeight,
       internalFormat: gl.RGBA8,
       format: gl.RGBA,
       type: gl.UNSIGNED_BYTE,
@@ -183,7 +173,7 @@ export class CRT {
       wrap: gl.REPEAT,
       mipmaps: true,
     });
-    uploadCanvas(gl, this.mask, canvas);
+    uploadImage(gl, this.mask, image);
   }
 
   _disposeTargets() {
@@ -471,6 +461,11 @@ export class CRT {
     sim.f32("crtConvergence", settings.convergence);
     sim.f32("crtScanlines", settings.scanlines);
     sim.f32("crtMask", settings.mask);
+    sim.vec2(
+      "crtMaskRepeats",
+      (targets.native[0] * MASK_TEXELS_PER_PIXEL) / this.mask.width,
+      (targets.native[1] * MASK_TEXELS_PER_PIXEL) / this.mask.height,
+    );
     sim.f32("crtBloomExpansion", settings.expansion);
     sim.f32("crtAmbient", settings.ambient);
     sim.f32("crtGlow", 1.0);
