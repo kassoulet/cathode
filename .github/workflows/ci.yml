@@ -1,0 +1,53 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: js/package-lock.json
+      - run: npm ci
+        working-directory: js
+      - name: Pre-commit hooks (prek)
+        uses: j178/prek-action@v1
+      - name: No Co-authored-by trailers in new commits
+        run: |
+          if [ "${{ github.event_name }}" = pull_request ]; then
+            range="${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }}"
+          else
+            range="${{ github.event.before }}..${{ github.sha }}"
+          fi
+          # first push of a branch has an all-zero `before`
+          case "$range" in 0000*) range="${{ github.sha }}~1..${{ github.sha }}" ;; esac
+          git log --format=%B "$range" | scripts/check-no-coauthors.sh -
+      - name: Build the browser extension
+        run: node tools/build.mjs
+        working-directory: js/extension
+      - name: Lint the Firefox package
+        run: npx --yes web-ext@10.8.0 lint --source-dir js/extension/dist/firefox --output text
+      - name: Build the Pages site
+        run: sh js/scripts/build-site.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cathode-extension
+          path: |
+            js/extension/dist/cathode-chrome-*.zip
+            js/extension/dist/cathode-firefox-*.zip

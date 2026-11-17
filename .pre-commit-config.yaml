@@ -1,0 +1,25 @@
+# Run with prek (https://github.com/j178/prek): `prek install` then commits are checked.
+default_install_hook_types: [pre-commit, commit-msg]
+exclude: ^(assets/|_site/|js/package-lock\.json$|js/extension/dist/)
+repos:
+  - repo: builtin
+    hooks:
+      - id: check-yaml
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-added-large-files
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+  - repo: local
+    hooks:
+      - id: js-syntax
+        name: node --check
+        language: system
+        entry: scripts/check-js-syntax.sh
+        files: \.(m?js)$
+      - id: no-coauthors
+        name: reject Co-authored-by trailers
+        language: system
+        entry: scripts/check-no-coauthors.sh
+        stages: [commit-msg]
+        always_run: true

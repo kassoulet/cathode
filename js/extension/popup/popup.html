@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cathode</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="app" id="app">
+    <header class="header">
+      <div class="brand">
+        <div class="brand-text"><h1>Cathode</h1><span>CRT for YouTube</span></div>
+      </div>
+      <label class="switch" title="Enable Cathode (Alt+C)">
+        <input id="enabled" type="checkbox" aria-label="Enable Cathode">
+        <span class="track" aria-hidden="true"><span class="thumb"></span></span>
+      </label>
+    </header>
+
+    <section class="panel">
+      <div class="section-label">Complexity</div>
+      <div class="presets" id="complexity"></div>
+    </section>
+    <section class="panel panel--tight">
+      <div class="section-label">Tier</div>
+      <div class="segmented" id="tier"></div>
+    </section>
+
+    <main class="controls" id="controls" aria-label="Settings"></main>
+
+    <footer class="footer">
+      <span class="hint"><kbd>Alt</kbd><span class="plus">+</span><kbd>C</kbd> toggle</span>
+      <span class="version" id="version"></span>
+      <button id="reset" class="reset" type="button">Reset</button>
+    </footer>
+    <p class="credit">Shaders &amp; masks: <a href="https://github.com/Toddler-Boy/CRTEmulation-Data" target="_blank" rel="noopener">Toddler-Boy/CRTEmulation-Data</a></p>
+  </div>
+  <script type="module" src="popup.js"></script>
+</body>
+</html>

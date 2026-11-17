@@ -78,3 +78,20 @@ pipeline; falls back to `fast` without WebGL2) and `fast` (Canvas2D: scanlines, 
 chromatic aberration, rounded bezel, hum bar only). `sw` throws: not implemented, nor is the
 Rust crate. `signal.humBar` has no effect on `gl` (no matching shader knob).
 Both backends are selectable in the comparison app.
+
+## Credits
+
+The CRT shaders, masks, presets and reflection image in `assets/crt/` come from
+[Toddler-Boy/CRTEmulation-Data](https://github.com/Toddler-Boy/CRTEmulation-Data)
+(licence in `assets/crt/LICENSE`). Every renderer built on them (`crt-canvas`, the
+`Cathode` API, the browser extension) uses those files.
+
+## Browser extension
+
+`js/extension/` is a Manifest V3 overlay (Chrome and Firefox) that runs `Cathode` on YouTube's player.
+`node js/extension/tools/build.mjs` builds `dist/chrome`, `dist/firefox` and the zips. Alt+C toggles it.
+
+## Development
+
+`prek install` sets up the git hooks (hygiene checks, `node --check`, and a commit-msg hook that rejects
+`Co-authored-by` trailers). CI (`.github/workflows/ci.yml`) runs the same hooks, builds the extension and lints it.

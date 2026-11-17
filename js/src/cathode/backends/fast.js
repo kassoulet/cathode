@@ -56,7 +56,7 @@ export function createFast(canvas) {
         ctx.drawImage(source, x, y, w, h);
       }
 
-      const lines = s.beam.scanlineCount ?? Math.min(480, Math.max(120, sh));
+      const lines = s.beam.scanlineCount || Math.min(480, Math.max(120, sh));
       const period = h / lines;
       if (s.beam.scanlineIntensity > 0 && period >= 2) {
         const row = document.createElement("canvas");
@@ -70,7 +70,7 @@ export function createFast(canvas) {
         ctx.translate(-x, -y);
       }
 
-      const v = s.geometry.cornerRadius * 8 * 0.6; // same vignette amount as the gl mapping
+      const v = s.geometry.vignette * 0.6;
       if (v > 0) {
         const g = ctx.createRadialGradient(W / 2, H / 2, Math.min(w, h) * 0.35, W / 2, H / 2, Math.hypot(w, h) / 2);
         g.addColorStop(0, "rgba(0,0,0,0)");

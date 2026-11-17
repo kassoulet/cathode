@@ -468,6 +468,7 @@ export class CRT {
     );
     sim.f32("crtBloomExpansion", settings.expansion);
     sim.f32("crtAmbient", settings.ambient);
+    sim.f32("crtHum", settings.hum);
     sim.f32("crtGlow", 1.0);
     sim.f32("u_deltaTime", dt);
     sim.f32("u_phosphorFlicker", flicker(settings));

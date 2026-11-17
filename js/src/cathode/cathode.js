@@ -1,25 +1,33 @@
 // Cathode: unified CRT filter API over interchangeable backends (specs.md).
 import { DEFAULTS, merge } from "./settings.js";
-import { Presets } from "./presets.js";
+import { Presets, presetFor } from "./presets.js";
 import { createGl, glSupported } from "./backends/gl.js";
 import { createFast } from "./backends/fast.js";
+
+/** A `Presets.X.Y` object, or the spec's `{complexity, tier, ...overrides}` shape. */
+function resolve(preset) {
+  if (preset?.complexity && preset?.tier) {
+    const { complexity, tier, ...overrides } = preset;
+    return merge(presetFor({ complexity, tier }), overrides);
+  }
+  return merge(DEFAULTS, preset);
+}
 
 export class Cathode {
   /**
    * @param {object} o
    * @param {HTMLCanvasElement} o.canvas
-   * @param {object} [o.preset=Presets.Detailed.Enhance]
-   * @param {"gl"|"fast"|"sw"} [o.backend="gl"]  gl falls back to fast without WebGL2.
+   * @param {object} [o.preset=Presets.Detailed.Enhance]  or `{complexity, tier}` (lowercase, as in the spec)
+   * @param {"gl"|"fast"} [o.backend="gl"]  gl falls back to fast without WebGL2; wgpu/sw throw.
    * @param {object} [o.gl]  extra options forwarded to crt-canvas (e.g. dataUrl).
    */
   constructor({ canvas, preset = Presets.Detailed.Enhance, backend = "gl", gl: glOptions } = {}) {
-    if (backend === "sw") throw new Error("cathode: the 'sw' backend is not implemented in cathode-js");
+    if (backend === "sw" || backend === "wgpu") throw new Error(`cathode: the '${backend}' backend is not implemented in cathode-js`);
     if (!(canvas instanceof HTMLCanvasElement)) throw new Error("cathode: `canvas` must be a <canvas>");
     this.canvas = canvas;
-    this.settings = merge(DEFAULTS, preset);
+    this.settings = resolve(preset);
     this.source = null;
     this._playing = false;
-    this._raf = 0;
     this.backend = null;
     if (backend === "gl" && !glSupported()) {
       console.warn("cathode: WebGL2 + float targets unavailable, falling back to 'fast'");
@@ -50,7 +58,7 @@ export class Cathode {
   }
 
   setPreset(preset) {
-    this.settings = merge(DEFAULTS, preset);
+    this.settings = resolve(preset);
     this.backend?.apply(this.settings);
     if (!this._playing) this.render();
     return this;
@@ -64,31 +72,51 @@ export class Cathode {
     this.backend.render(s, time);
   }
 
-  /** Render every animation frame (and play an attached <video>). */
-  play() {
+  /** Start the render loop only (requestVideoFrameCallback for a <video>, else rAF). Never touches playback. */
+  run() {
     if (this._playing) return this;
     this._playing = true;
-    this.source?.play?.();
-    const loop = (now) => {
+    const src = this.source;
+    const rvfc = src?.requestVideoFrameCallback ? src : null;
+    const loop = () => {
       if (!this._playing) return;
-      this._raf = requestAnimationFrame(loop);
-      this.render(now / 1000);
+      schedule();
+      this.render(performance.now() / 1000);
     };
-    this._raf = requestAnimationFrame(loop);
+    const schedule = () => {
+      if (rvfc) {
+        const id = rvfc.requestVideoFrameCallback(loop);
+        this._cancel = () => rvfc.cancelVideoFrameCallback(id);
+      } else {
+        const id = requestAnimationFrame(loop);
+        this._cancel = () => cancelAnimationFrame(id);
+      }
+    };
+    schedule();
     return this;
   }
 
-  pause() {
+  stop() {
     this._playing = false;
-    cancelAnimationFrame(this._raf);
-    this.source?.pause?.();
+    this._cancel?.();
     return this;
+  }
+
+  /** `run()` plus playing an attached <video>. */
+  play() {
+    this.source?.play?.();
+    return this.run();
+  }
+
+  pause() {
+    this.source?.pause?.();
+    return this.stop();
   }
 
   toJSON() { return this.settings; }
 
   dispose() {
-    this.pause();
+    this.stop();
     this.backend?.dispose();
     this.backend = null;
   }

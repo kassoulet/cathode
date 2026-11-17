@@ -108,6 +108,15 @@ vec3 shadowMask ( vec3 col, vec2 uv )
 }
 //-----------------------------------------------------------------------------
 
+uniform float	crtHum = 0.0;	// AC hum: slow-rolling dark bands (beat between mains and refresh rate)
+
+vec3 humBar ( vec3 col )
+{
+	float	band = 0.5 + 0.5 * sin ( 2.0 * PI * ( fragCoord.y * 1.5 - iTime * 0.15 ) );
+	return col * ( 1.0 - crtHum * 0.4 * band );
+}
+//-----------------------------------------------------------------------------
+
 uniform float	u_deltaTime = 0.016;
 uniform	vec3	u_decayFactor = vec3 ( 18.0, 10.0, 20.0 );
 uniform float	u_phosphorFlicker = 0.0;
@@ -158,6 +167,7 @@ void main ()
 	col = reduceBlue ( col );
 	col = scanlines ( col, uv.y * float ( textureSize ( iChannel0, 0 ).y ) );
 	col = shadowMask ( col, fragCoord );
+	col = humBar ( col );
 	col = phosphorDecay ( col );
 
 	fragColor = vec4 ( col, 1.0 );

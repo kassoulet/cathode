@@ -55,6 +55,7 @@ export const DEFAULT_SETTINGS = {
   // not in the YAML presets, but exposed by the module
   reflections: 0.25,
   overscan: 0,
+  hum: 0,
   brightness: 0.5,
   contrast: 0.8,
   saturation: 0.5,
