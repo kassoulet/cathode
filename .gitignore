@@ -1,3 +1,9 @@
 /target
 screenshot-*.png
 _site
+dist/
+node_modules/
+web-ext-artifacts/
+__pycache__/
+*.pyc
+.DS_Store
