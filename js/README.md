@@ -53,7 +53,7 @@ the package.
 It renders the same example image (or an uploaded one) in two panes; each pane
 picks its renderer: `crt-canvas`, the
 [`crt-shader`](https://www.npmjs.com/package/crt-shader) npm package, `cathode`
-(YouTube CRT overlay) or zmbc's `CRT-Lite` / `CRT Deluxe`. The cathode and zmbc
+(YouTube CRT overlay) or zmbc's `CRT-Lite` / `CRT Deluxe`, or the well-known libretro shaders Lottes, crt-geom, crt-easymode and crt-royale (fetched at runtime from libretro/glsl-shaders at a pinned commit, not vendored; `renderers/libretro.js` is a small `.glslp` runner). The cathode and zmbc
 shaders and presets are extracted into `compare/renderers/` (`*-data.js`,
 `zmbc-shaders.js`). Every setting of each renderer is exposed, plus PNG export and
 "copy settings" as JSON. `crt-shader` is a still-image renderer, so it is not
