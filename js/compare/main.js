@@ -3,8 +3,9 @@ import ours from "./renderers/ours.js";
 import theirs from "./renderers/theirs.js";
 import cathode from "./renderers/cathode.js";
 import { lite, deluxe } from "./renderers/zmbc.js";
+import { cathodeGl, cathodeFast } from "./renderers/cathode-js.js";
 
-const RENDERERS = [ours, theirs, cathode, lite, deluxe];
+const RENDERERS = [ours, theirs, cathodeGl, cathodeFast, cathode, lite, deluxe];
 const DEFAULT_PANES = ["crt-canvas", "crt-shader"];
 
 const $ = (selector) => document.querySelector(selector);

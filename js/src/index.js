@@ -17,6 +17,8 @@ import {
 } from "./presets.js";
 
 export { CRT, plan } from "./crt.js";
+export { Cathode } from "./cathode/cathode.js";
+export { Presets } from "./cathode/presets.js";
 export {
   DEFAULT_SETTINGS,
   MASKS,

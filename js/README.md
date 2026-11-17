@@ -59,3 +59,22 @@ shaders and presets are extracted into `compare/renderers/` (`*-data.js`,
 "copy settings" as JSON. `crt-shader` is a still-image renderer, so it is not
 re-rendered per frame and has no video input. The example images are generated
 by `compare/images/generate.py`.
+
+## Cathode API (`src/cathode/`)
+
+A facade implementing `specs.md`: a preset matrix, grouped settings and swappable backends.
+
+```js
+import { Cathode, Presets } from "crt-canvas";
+const filter = new Cathode({ canvas, preset: Presets.Detailed.Enhance, backend: "gl" });
+filter.attachSource(video);   // video, canvas, img, ImageBitmap, OffscreenCanvas
+filter.play();
+filter.configure({ beam: { scanlineIntensity: 0.4 }, phosphor: { type: "shadow-mask" } });
+filter.setPreset(Presets.Exhaustive.Degrade);
+```
+
+`Presets.{Simple,Detailed,Exhaustive}.{Clean,Enhance,Degrade}`. Backends: `gl` (the crt-canvas
+pipeline; falls back to `fast` without WebGL2) and `fast` (Canvas2D: scanlines, vignette,
+chromatic aberration, rounded bezel, hum bar only). `sw` throws: not implemented, nor is the
+Rust crate. `signal.humBar` has no effect on `gl` (no matching shader knob).
+Both backends are selectable in the comparison app.
