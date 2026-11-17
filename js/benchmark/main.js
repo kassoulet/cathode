@@ -29,6 +29,8 @@ const runButton = document.querySelector("#run");
 const cancelButton = document.querySelector("#cancel");
 const downloadButton = document.querySelector("#download");
 const copyButton = document.querySelector("#copy");
+const csvDownloadButton = document.querySelector("#csv-download");
+const csvCopyButton = document.querySelector("#csv-copy");
 const statusEl = document.querySelector("#status");
 const barEl = document.querySelector("#bar");
 const bodyEl = document.querySelector("#results tbody");
@@ -170,6 +172,8 @@ async function run() {
   cancelButton.disabled = false;
   downloadButton.disabled = true;
   copyButton.disabled = true;
+  csvDownloadButton.disabled = true;
+  csvCopyButton.disabled = true;
   bodyEl.replaceChildren();
   errorsEl.textContent = "";
   jsonEl.value = "";
@@ -218,12 +222,16 @@ async function run() {
           const def = { name: input.name, mode: "pixel", lines: input.height };
           try {
             instance.useImage?.(def);
-            for (let i = 0; i < WARMUP; i++) frameTime(instance, gl, input.image, def);
+            // Yield between frames so slow (software) GPUs don't freeze the page and Cancel works.
+            for (let i = 0; i < WARMUP && !cancelled; i++) { frameTime(instance, gl, input.image, def); await tick(); }
             const samples = [];
-            for (let r = 0; r < RUNS; r++) {
-              for (let f = 0; f < FRAMES_PER_RUN; f++) samples.push(frameTime(instance, gl, input.image, def));
-              await tick();
+            for (let r = 0; r < RUNS && !cancelled; r++) {
+              for (let f = 0; f < FRAMES_PER_RUN && !cancelled; f++) {
+                samples.push(frameTime(instance, gl, input.image, def));
+                await tick();
+              }
             }
+            if (cancelled) break;
             const result = {
               renderer: renderer.id,
               label: renderer.label,
@@ -282,6 +290,8 @@ async function run() {
   cancelButton.disabled = true;
   downloadButton.disabled = false;
   copyButton.disabled = false;
+  csvDownloadButton.disabled = false;
+  csvCopyButton.disabled = false;
   setProgress(1, 1);
   setStatus(`${cancelled ? "cancelled" : "done"} · ${results.length} rows · ${((performance.now() - startedAt) / 1000).toFixed(1)} s`);
   running = false;
@@ -296,12 +306,30 @@ runButton.addEventListener("click", () => {
   });
 });
 cancelButton.addEventListener("click", () => { cancelled = true; setStatus("cancelling…"); });
-downloadButton.addEventListener("click", () => {
-  const url = URL.createObjectURL(new Blob([jsonEl.value], { type: "application/json" }));
+
+function toCsv(results) {
+  const columns = ["renderer", "label", "input", "inputWidth", "inputHeight",
+    "output", "outputWidth", "outputHeight", "canvasWidth", "canvasHeight", "timing",
+    "samples", "medianMs", "minMs", "maxMs", "meanMs", "stddevMs", "fps"];
+  const cell = (value) => {
+    const text = value == null ? "" : String(value);
+    return /[",\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;
+  };
+  return [columns.join(","), ...results.map((row) => columns.map((c) => cell(row[c])).join(","))].join("\n");
+}
+
+function download(name, text, type) {
+  const url = URL.createObjectURL(new Blob([text], { type }));
   const link = document.createElement("a");
   link.href = url;
-  link.download = `crt-benchmark-${Date.now()}.json`;
+  link.download = name;
   link.click();
   URL.revokeObjectURL(url);
-});
+}
+
+downloadButton.addEventListener("click", () =>
+  download(`crt-benchmark-${Date.now()}.json`, jsonEl.value, "application/json"));
 copyButton.addEventListener("click", () => navigator.clipboard.writeText(jsonEl.value));
+csvDownloadButton.addEventListener("click", () =>
+  download(`crt-benchmark-${Date.now()}.csv`, toCsv(window.benchmark.results), "text/csv"));
+csvCopyButton.addEventListener("click", () => navigator.clipboard.writeText(toCsv(window.benchmark.results)));
