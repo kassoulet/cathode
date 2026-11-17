@@ -39,14 +39,19 @@ const loadImage = (url) => new Promise((resolve, reject) => {
 function setupPane(section, initial) {
   const q = (sel) => section.querySelector(sel);
   const picker = q(".renderer");
-  const pane = { instance: null, generation: 0, frames: 0, fps: 0, text: "", last: performance.now() };
+  const pane = {
+    instance: null, generation: 0, frames: 0, fps: 0, text: "", last: performance.now(),
+    gl: null, msSum: 0, msCount: 0, ms: null,
+  };
   for (const r of RENDERERS) picker.add(new Option(r.label, r.id));
   picker.value = initial;
 
   const metaEl = q(".meta");
   let metaAt = 0;
   const writeMeta = () => {
-    if (pane.text) metaEl.textContent = pane.text + (pane.fps ? ` · ${Math.round(pane.fps)} fps` : "");
+    if (!pane.text) return;
+    metaEl.textContent = pane.text + (pane.fps ? ` · ${Math.round(pane.fps)} fps` : "") +
+      (pane.ms !== null ? ` · ${pane.ms.toFixed(1)} ms/frame` : "");
   };
   pane.writeMeta = writeMeta;
   const meta = (text) => {
@@ -60,7 +65,8 @@ function setupPane(section, initial) {
     const generation = ++pane.generation;
     pane.instance?.dispose?.();
     pane.instance = null;
-    Object.assign(pane, { frames: 0, fps: 0, text: "", last: performance.now() });
+    pane.gl = null;
+    Object.assign(pane, { frames: 0, fps: 0, text: "", last: performance.now(), msSum: 0, msCount: 0, ms: null });
     // A canvas can't change context type, so every switch gets a fresh one.
     const view = q(".view");
     const canvas = document.createElement("canvas");
@@ -74,6 +80,7 @@ function setupPane(section, initial) {
       });
       if (generation !== pane.generation) return instance.dispose?.();
       pane.instance = instance;
+      pane.gl = instance.gl ?? canvas.getContext("webgl2");
       if (current) instance.useImage(current.def);
     } catch (error) {
       showError(error);
@@ -89,8 +96,13 @@ function setupPane(section, initial) {
 function frame(now) {
   if (current) {
     for (const pane of panes) {
+      if (!pane.instance) continue;
+      const started = performance.now();
       try {
-        pane.instance?.draw(current.image, current.def, now);
+        pane.instance.draw(current.image, current.def, now);
+        pane.gl?.finish(); // wait for the GPU so ms is real work, not just submission
+        pane.msSum += performance.now() - started;
+        pane.msCount += 1;
       } catch (error) {
         showError(error);
         pane.instance = null; // stop redrawing a broken renderer
@@ -100,12 +112,14 @@ function frame(now) {
   for (const pane of panes) {
     if (now - pane.last >= 500) {
       pane.fps = current ? (pane.frames * 1000) / (now - pane.last) : 0;
+      pane.ms = pane.msCount ? pane.msSum / pane.msCount : null;
       pane.frames = 0;
+      pane.msSum = 0;
+      pane.msCount = 0;
       pane.last = now;
       pane.writeMeta();
     }
   }
-  // Registered after draw so crt-shader's flush rAF runs first next frame.
   requestAnimationFrame(frame);
 }
 
