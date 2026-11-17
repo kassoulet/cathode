@@ -39,21 +39,28 @@ const loadImage = (url) => new Promise((resolve, reject) => {
 function setupPane(section, initial) {
   const q = (sel) => section.querySelector(sel);
   const picker = q(".renderer");
-  const pane = { instance: null, generation: 0 };
+  const pane = { instance: null, generation: 0, frames: 0, fps: 0, text: "", last: performance.now() };
   for (const r of RENDERERS) picker.add(new Option(r.label, r.id));
   picker.value = initial;
 
   const metaEl = q(".meta");
   let metaAt = 0;
+  const writeMeta = () => {
+    if (pane.text) metaEl.textContent = pane.text + (pane.fps ? ` · ${Math.round(pane.fps)} fps` : "");
+  };
+  pane.writeMeta = writeMeta;
   const meta = (text) => {
+    pane.text = text;
+    pane.frames += 1;
     const now = performance.now();
-    if (now - metaAt > 500) { metaAt = now; metaEl.textContent = text; }
+    if (now - metaAt > 500) { metaAt = now; writeMeta(); }
   };
 
   async function load() {
     const generation = ++pane.generation;
     pane.instance?.dispose?.();
     pane.instance = null;
+    Object.assign(pane, { frames: 0, fps: 0, text: "", last: performance.now() });
     // A canvas can't change context type, so every switch gets a fresh one.
     const view = q(".view");
     const canvas = document.createElement("canvas");
@@ -80,16 +87,26 @@ function setupPane(section, initial) {
 }
 
 function frame(now) {
-  requestAnimationFrame(frame);
-  if (!current) return;
-  for (const pane of panes) {
-    try {
-      pane.instance?.draw(current.image, current.def, now);
-    } catch (error) {
-      showError(error);
-      pane.instance = null; // stop redrawing a broken renderer
+  if (current) {
+    for (const pane of panes) {
+      try {
+        pane.instance?.draw(current.image, current.def, now);
+      } catch (error) {
+        showError(error);
+        pane.instance = null; // stop redrawing a broken renderer
+      }
     }
   }
+  for (const pane of panes) {
+    if (now - pane.last >= 500) {
+      pane.fps = current ? (pane.frames * 1000) / (now - pane.last) : 0;
+      pane.frames = 0;
+      pane.last = now;
+      pane.writeMeta();
+    }
+  }
+  // Registered after draw so crt-shader's flush rAF runs first next frame.
+  requestAnimationFrame(frame);
 }
 
 async function main() {
@@ -137,6 +154,7 @@ async function main() {
 
   await choose(IMAGES[0], buttons[0]);
   await Promise.all(panes.map((pane) => pane.load()));
+  panes.forEach((pane) => { pane.last = performance.now(); pane.frames = 0; });
   requestAnimationFrame(frame);
 }
 

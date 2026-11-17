@@ -56,8 +56,9 @@ picks its renderer: `crt-canvas`, the
 (YouTube CRT overlay) or zmbc's `CRT-Lite` / `CRT Deluxe`, or the well-known libretro shaders Lottes, crt-geom, crt-easymode and crt-royale (fetched at runtime from libretro/glsl-shaders at a pinned commit, not vendored; `renderers/libretro.js` is a small `.glslp` runner). The cathode and zmbc
 shaders and presets are extracted into `compare/renderers/` (`*-data.js`,
 `zmbc-shaders.js`). Every setting of each renderer is exposed, plus PNG export and
-"copy settings" as JSON. `crt-shader` is a still-image renderer, so it is not
-re-rendered per frame and has no video input. The example images are generated
+"copy settings" as JSON. Every pane redraws each frame and its meta line shows
+the measured fps; `crt-shader`'s still-image cache is bypassed there so its
+number reflects the shader path too. The example images are generated
 by `compare/images/generate.py`.
 
 ## Cathode API (`src/cathode/`)
