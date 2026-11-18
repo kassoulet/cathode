@@ -1,0 +1,38 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>cathode-fx: presets and live settings</title>
+<style>body{margin:1em;background:#111;color:#ccc;font:14px sans-serif}
+canvas{width:min(100%,640px);display:block}label{display:block;margin:.4em 0}</style>
+<canvas width="640" height="480"></canvas>
+<p>
+  <select id="complexity"><option>simple</option><option selected>detailed</option><option>exhaustive</option></select>
+  <select id="tier"><option>clean</option><option selected>enhance</option><option>degrade</option></select>
+</p>
+<label>curvature <input id="curv" type="range" min="0" max="0.5" step="0.01" value="0.12"></label>
+<label>scanlines <input id="scan" type="range" min="0" max="1" step="0.01" value="0.35"></label>
+<script type="module">
+import { Cathode } from "../src/index.js";
+
+const src = document.createElement("canvas");
+src.width = 320; src.height = 240;
+const g = src.getContext("2d");
+const draw = (t) => {                       // animated test picture
+  g.fillStyle = "#223"; g.fillRect(0, 0, 320, 240);
+  g.fillStyle = "#fc3"; g.fillRect(140 + 100 * Math.sin(t / 700), 100, 40, 40);
+  g.fillStyle = "#fff"; g.font = "bold 24px monospace"; g.fillText("cathode-fx", 90, 40);
+};
+
+const canvas = document.querySelector("canvas");
+const cathode = new Cathode({ canvas, preset: { complexity: "detailed", tier: "enhance" } });
+await cathode.ready;
+cathode.attachSource(src);
+
+const loop = (t) => { draw(t); cathode.render(t / 1000); requestAnimationFrame(loop); };
+requestAnimationFrame(loop);
+
+// Presets replace all settings; configure() merges grouped overrides.
+const apply = () => cathode.setPreset({ complexity: complexity.value, tier: tier.value });
+complexity.onchange = tier.onchange = apply;
+curv.oninput = () => cathode.configure({ geometry: { curvature: +curv.value } });
+scan.oninput = () => cathode.configure({ beam: { scanlineIntensity: +scan.value } });
+</script>

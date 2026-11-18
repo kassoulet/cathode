@@ -1,0 +1,21 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>cathode-fx: CRT video player</title>
+<style>body{margin:0;background:#111;color:#ccc;font:14px sans-serif;text-align:center}
+canvas{width:min(100vw,800px);display:block;margin:auto}</style>
+<canvas></canvas>
+<p><input id="file" type="file" accept="video/*"> <button id="toggle">play / pause</button></p>
+<video id="v" muted loop playsinline hidden></video>
+<script type="module">
+// In your project: import { Cathode, Presets } from "cathode-fx";
+import { Cathode, Presets } from "../src/index.js";
+
+const video = document.getElementById("v");
+const cathode = new Cathode({ canvas: document.querySelector("canvas"), preset: Presets.Detailed.Enhance });
+await cathode.ready;                 // falls back to the Canvas2D "fast" backend without WebGL2
+cathode.attachSource(video);
+
+file.onchange = () => { video.src = URL.createObjectURL(file.files[0]); cathode.play(); };
+let playing = true;
+toggle.onclick = () => (playing = !playing) ? cathode.play() : cathode.pause();
+</script>

@@ -159,7 +159,7 @@ export function normalizeAnalog(value) {
     case "yiq":
       return "ntsc";
     default:
-      throw new Error(`crt-canvas: analog must be off, pal or ntsc (got ${value})`);
+      throw new Error(`cathode-fx: analog must be off, pal or ntsc (got ${value})`);
   }
 }
 
@@ -201,7 +201,7 @@ export async function loadPreset(dataUrl, name) {
   const response = await fetch(url);
   if (!response.ok) {
     throw new Error(
-      `crt-canvas: unknown preset '${name}' (HTTP ${response.status}); ` +
+      `cathode-fx: unknown preset '${name}' (HTTP ${response.status}); ` +
         `available: ${PRESET_NAMES.join(", ")}`,
     );
   }
@@ -254,7 +254,7 @@ export function applySetting(settings, key, value) {
     name = KEY_MAP[normalized] ?? normalized;
   }
   if (!(name in DEFAULT_SETTINGS)) {
-    throw new Error(`crt-canvas: unknown setting '${key}'`);
+    throw new Error(`cathode-fx: unknown setting '${key}'`);
   }
   if (name === "analog") {
     settings.analog = normalizeAnalog(value);
@@ -264,7 +264,7 @@ export function applySetting(settings, key, value) {
     settings.lines = Math.max(60, Math.min(1080, Math.round(Number(value))));
   } else if (PAIR_KEYS.has(name)) {
     if (!Array.isArray(value) || value.length !== 2) {
-      throw new Error(`crt-canvas: ${key} expects [x, y]`);
+      throw new Error(`cathode-fx: ${key} expects [x, y]`);
     }
     settings[name] = [Number(value[0]), Number(value[1])];
   } else if (RAW_KEYS.has(name)) {
@@ -288,6 +288,6 @@ export function maskFileName(name) {
   if (canonical) return `${canonical}.png`;
   if (aliases[wanted]) return `${aliases[wanted]}.png`;
   throw new Error(
-    `crt-canvas: CRT mask '${name}' not found (have: ${MASKS.join(", ")})`,
+    `cathode-fx: CRT mask '${name}' not found (have: ${MASKS.join(", ")})`,
   );
 }

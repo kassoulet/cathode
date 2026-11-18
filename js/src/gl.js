@@ -14,11 +14,11 @@ export function getContext(canvas, attributes = {}) {
     ...attributes,
   });
   if (!gl) {
-    throw new Error("crt-canvas: WebGL2 is not available in this browser");
+    throw new Error("cathode-fx: WebGL2 is not available in this browser");
   }
   if (!gl.getExtension("EXT_color_buffer_float")) {
     throw new Error(
-      "crt-canvas: EXT_color_buffer_float is required (RGBA16F render targets)",
+      "cathode-fx: EXT_color_buffer_float is required (RGBA16F render targets)",
     );
   }
   return gl;
@@ -31,7 +31,7 @@ function compile(gl, type, source, label) {
   if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
     const log = gl.getShaderInfoLog(shader);
     gl.deleteShader(shader);
-    throw new Error(`crt-canvas: compiling ${label} failed:\n${log}`);
+    throw new Error(`cathode-fx: compiling ${label} failed:\n${log}`);
   }
   return shader;
 }
@@ -54,7 +54,7 @@ export class Program {
     if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
       const log = gl.getProgramInfoLog(program);
       gl.deleteProgram(program);
-      throw new Error(`crt-canvas: linking ${label} failed:\n${log}`);
+      throw new Error(`cathode-fx: linking ${label} failed:\n${log}`);
     }
     this.program = program;
   }
@@ -232,7 +232,7 @@ export class Target {
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     if (status !== gl.FRAMEBUFFER_COMPLETE) {
       throw new Error(
-        `crt-canvas: incomplete framebuffer (${status.toString(16)})`,
+        `cathode-fx: incomplete framebuffer (${status.toString(16)})`,
       );
     }
   }

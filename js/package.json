@@ -1,24 +1,31 @@
 {
-  "name": "crt-canvas",
+  "name": "cathode-fx",
   "version": "0.1.0",
-  "description": "WebGL2 CRT emulation for a canvas, using the Toddler-Boy/CRTEmulation-Data shaders",
+  "description": "WebGL2 CRT emulation for a canvas or video: presets, grouped settings, gl and fast backends",
   "type": "module",
   "main": "./src/index.js",
   "module": "./src/index.js",
   "exports": {
-    ".": "./src/index.js",
-    "./presets": "./src/presets.js"
+    ".": {
+      "types": "./src/index.d.ts",
+      "default": "./src/index.js"
+    },
+    "./package.json": "./package.json"
   },
   "files": [
     "src",
     "assets",
-    "README.md"
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
   ],
   "sideEffects": false,
   "scripts": {
     "demo": "node scripts/serve.mjs",
     "sync-assets": "node scripts/sync-assets.mjs",
-    "prepack": "node scripts/sync-assets.mjs"
+    "prepack": "node scripts/sync-assets.mjs",
+    "test": "node --test",
+    "pack:check": "npm pack --dry-run"
   },
   "keywords": [
     "crt",
@@ -28,10 +35,32 @@
     "shader",
     "retro",
     "scanlines",
-    "phosphor"
+    "phosphor",
+    "video",
+    "crt-filter",
+    "retro-gaming",
+    "typescript"
   ],
   "license": "MIT",
   "devDependencies": {
     "crt-shader": "^1.0.1"
+  },
+  "types": "./src/index.d.ts",
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kassoulet/cathode.git",
+    "directory": "js"
+  },
+  "bugs": {
+    "url": "https://github.com/kassoulet/cathode/issues"
+  },
+  "homepage": "https://github.com/kassoulet/cathode#readme",
+  "author": "Gautier Portet",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
   }
 }

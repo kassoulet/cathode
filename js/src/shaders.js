@@ -58,7 +58,7 @@ export async function loadShader(baseUrl, name, cache = new Map()) {
     const response = await fetch(url);
     if (!response.ok) {
       throw new Error(
-        `crt-canvas: cannot load shader ${url} (HTTP ${response.status})`,
+        `cathode-fx: cannot load shader ${url} (HTTP ${response.status})`,
       );
     }
     let text = await response.text();

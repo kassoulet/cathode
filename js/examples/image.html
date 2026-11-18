@@ -1,0 +1,20 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>cathode-fx: filter a canvas or image</title>
+<style>body{margin:0;background:#111}canvas{width:min(100vw,800px);display:block;margin:auto}</style>
+<canvas width="640" height="480"></canvas>
+<script type="module">
+// In your project: import { createCRT } from "cathode-fx";
+import { createCRT } from "../src/index.js";
+
+// Any drawable works as a source: <img>, <video>, <canvas>, ImageBitmap.
+const src = document.createElement("canvas");
+src.width = 320; src.height = 240;
+const g = src.getContext("2d");
+const hues = [0, 60, 120, 180, 240, 300];
+hues.forEach((h, i) => { g.fillStyle = `hsl(${h} 90% 50%)`; g.fillRect(i * 53, 0, 54, 240); });
+g.fillStyle = "#fff"; g.font = "bold 40px monospace"; g.fillText("CRT", 110, 130);
+
+const crt = await createCRT(document.querySelector("canvas"), { preset: "Default", lines: 240 });
+crt.render(src, 0);
+</script>

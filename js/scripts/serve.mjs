@@ -49,7 +49,7 @@ const server = http.createServer(async (request, response) => {
 });
 
 server.listen(port, () => {
-  console.log(`crt-canvas demo:    http://localhost:${port}/js/demo/`);
+  console.log(`examples:        http://localhost:${port}/js/examples/`);
   console.log(`comparison app:   http://localhost:${port}/js/compare/`);
   console.log(`benchmark:        http://localhost:${port}/js/benchmark/`);
 });

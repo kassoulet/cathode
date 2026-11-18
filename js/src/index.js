@@ -1,4 +1,4 @@
-// crt-canvas — CRT emulation for a <canvas>, using the shaders from
+// cathode-fx — CRT emulation for a <canvas>, using the shaders from
 // Toddler-Boy/CRTEmulation-Data.
 
 import { getContext } from "./gl.js";
@@ -34,7 +34,7 @@ function loadImage(url) {
     image.crossOrigin = "anonymous";
     image.onload = () => resolve(image);
     image.onerror = () =>
-      reject(new Error(`crt-canvas: cannot load image ${url}`));
+      reject(new Error(`cathode-fx: cannot load image ${url}`));
     image.src = url;
   });
 }
@@ -56,7 +56,7 @@ function loadImage(url) {
  */
 export async function createCRT(canvas, options = {}) {
   if (!(canvas instanceof HTMLCanvasElement)) {
-    throw new Error("crt-canvas: the first argument must be a <canvas>");
+    throw new Error("cathode-fx: the first argument must be a <canvas>");
   }
   const gl = getContext(canvas, options.gl);
   const dataUrl = await detectDataUrl(options.dataUrl);

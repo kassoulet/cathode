@@ -60,14 +60,14 @@ function tubeRect(winW, winH, aspect, margin = 0.96) {
 }
 
 function sourceSize(source) {
-  if (!source) throw new Error("crt-canvas: no source was provided");
+  if (!source) throw new Error("cathode-fx: no source was provided");
   const width =
     source.videoWidth ?? source.naturalWidth ?? source.displayWidth ?? source.width;
   const height =
     source.videoHeight ?? source.naturalHeight ?? source.displayHeight ?? source.height;
   if (!width || !height) {
     throw new Error(
-      "crt-canvas: the source has no dimensions yet (is the video metadata loaded?)",
+      "cathode-fx: the source has no dimensions yet (is the video metadata loaded?)",
     );
   }
   return [width, height];
@@ -157,7 +157,7 @@ export class CRT {
     const gl = this.gl;
     const image = this.maskImages.get(name);
     if (!image) {
-      throw new Error(`crt-canvas: CRT mask '${name}' was not loaded`);
+      throw new Error(`cathode-fx: CRT mask '${name}' was not loaded`);
     }
     if (this.mask) gl.deleteTexture(this.mask.texture);
 

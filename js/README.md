@@ -1,4 +1,4 @@
-# crt-canvas
+# cathode-fx
 
 WebGL2 CRT emulation for any `<canvas>`, using the shaders from
 [Toddler-Boy/CRTEmulation-Data](https://github.com/Toddler-Boy/CRTEmulation-Data)
@@ -7,8 +7,24 @@ reflection, optional PAL/NTSC signal path).
 
 Needs WebGL2 with `EXT_color_buffer_float`.
 
+## Install
+
+```bash
+npm install cathode-fx
+```
+
+The package is ES modules only, has no runtime dependencies and ships TypeScript types. The shaders, masks and
+presets live in `cathode-fx/assets/crt/` and are fetched at runtime. By default they are found next to the
+module; when you bundle the library (Vite, webpack...) copy that folder to your static assets and pass its URL:
+
 ```js
-import { createCRT } from "crt-canvas";
+createCRT(canvas, { dataUrl: "/crt/" });       // or new Cathode({ canvas, gl: { dataUrl: "/crt/" } })
+// or from a CDN:
+createCRT(canvas, { dataUrl: "https://cdn.jsdelivr.net/npm/cathode-fx@0.1.0/assets/crt/" });
+```
+
+```js
+import { createCRT } from "cathode-fx";
 
 const crt = await createCRT(document.querySelector("canvas"), {
   preset: "Default", // see PRESET_NAMES
@@ -43,19 +59,25 @@ Shaders, masks and presets are loaded at runtime from `assets/crt/`
 `../../assets/crt`; `npm run sync-assets` (run by `prepack`) copies them into
 the package.
 
-## Demo
+## Examples
 
-`npm run demo`, then open <http://localhost:8080/js/demo/>.
+Small self-contained pages in [`examples/`](examples/): `image.html` (`createCRT` on a canvas),
+`video.html` (`Cathode` video player), `presets.html` (preset matrix and live settings). Run `npm run demo`, then
+open <http://localhost:8080/js/examples/>.
+
+## Interactive demo
+
+`npm run demo`, then open <http://localhost:8080/js/examples/demo/> (interactive demo of `createCRT`).
 
 ## Comparison app
 
 `npm install && npm run demo`, then open <http://localhost:8080/js/compare/>.
 It renders the same example image (or an uploaded one) in two panes; each pane
-picks its renderer: `crt-canvas`, the
+picks its renderer: `crt-canvas` (this lib's `createCRT`), the
 [`crt-shader`](https://www.npmjs.com/package/crt-shader) npm package, `cathode`
-(YouTube CRT overlay) or zmbc's `CRT-Lite` / `CRT Deluxe`, or the well-known libretro shaders Lottes, crt-geom, crt-easymode and crt-royale (fetched at runtime from libretro/glsl-shaders at a pinned commit, not vendored; `renderers/libretro.js` is a small `.glslp` runner). The cathode and zmbc
+(YouTube CRT overlay) or lowres `CRT-Lite` / `CRT Deluxe`, or the well-known libretro shaders Lottes, crt-geom, crt-easymode and crt-royale (fetched at runtime from libretro/glsl-shaders at a pinned commit, not vendored; `renderers/libretro.js` is a small `.glslp` runner). The cathode and lowres
 shaders and presets are extracted into `compare/renderers/` (`*-data.js`,
-`zmbc-shaders.js`). Every setting of each renderer is exposed, plus PNG export and
+`lowres-shaders.js`). Every setting of each renderer is exposed, plus PNG export and
 "copy settings" as JSON. Every pane redraws each frame; its meta line shows the
 frame rate and the average frame time in ms (measured after `gl.finish()`, so it
 is GPU work rather than the 60 fps rAF cap). `crt-shader`'s still-image cache is
@@ -73,10 +95,12 @@ export) under `window.benchmark`. It takes several minutes at 2160p.
 
 ## Cathode API (`src/cathode/`)
 
+Full reference: [docs/cathode-api.md](https://github.com/kassoulet/cathode/blob/main/docs/cathode-api.md). Shader comparison: [docs/shader-families.md](https://github.com/kassoulet/cathode/blob/main/docs/shader-families.md).
+
 A facade implementing `specs.md`: a preset matrix, grouped settings and swappable backends.
 
 ```js
-import { Cathode, Presets } from "crt-canvas";
+import { Cathode, Presets } from "cathode-fx";
 const filter = new Cathode({ canvas, preset: Presets.Detailed.Enhance, backend: "gl" });
 filter.attachSource(video);   // video, canvas, img, ImageBitmap, OffscreenCanvas
 filter.play();
@@ -84,23 +108,26 @@ filter.configure({ beam: { scanlineIntensity: 0.4 }, phosphor: { type: "shadow-m
 filter.setPreset(Presets.Exhaustive.Degrade);
 ```
 
-`Presets.{Simple,Detailed,Exhaustive}.{Clean,Enhance,Degrade}`. Backends: `gl` (the crt-canvas
+`Presets.{Simple,Detailed,Exhaustive}.{Clean,Enhance,Degrade}`. Backends: `gl` (the cathode-fx
 pipeline; falls back to `fast` without WebGL2) and `fast` (Canvas2D: scanlines, vignette,
 chromatic aberration, rounded bezel, hum bar only). `sw` throws: not implemented, nor is the
-Rust crate. `signal.humBar` has no effect on `gl` (no matching shader knob).
-Both backends are selectable in the comparison app.
+Rust crate.Both backends are selectable in the comparison app.
 
 ## Credits
 
 The CRT shaders, masks, presets and reflection image in `assets/crt/` come from
 [Toddler-Boy/CRTEmulation-Data](https://github.com/Toddler-Boy/CRTEmulation-Data)
-(licence in `assets/crt/LICENSE`). Every renderer built on them (`crt-canvas`, the
+(licence in `assets/crt/LICENSE`). Every renderer built on them (`cathode-fx`, the
 `Cathode` API, the browser extension) uses those files.
 
 ## Browser extension
 
 `js/extension/` is a Manifest V3 overlay (Chrome and Firefox) that runs `Cathode` on YouTube's player.
 `node js/extension/tools/build.mjs` builds `dist/chrome`, `dist/firefox` and the zips. Alt+C toggles it.
+
+## Contributing
+
+See [CONTRIBUTING.md](https://github.com/kassoulet/cathode/blob/main/CONTRIBUTING.md). Licence: [MIT](https://github.com/kassoulet/cathode/blob/main/LICENSE) (the shader data in `assets/crt/` is CC0).
 
 ## Development
 

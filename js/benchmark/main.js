@@ -2,7 +2,7 @@
 import ours from "../compare/renderers/ours.js";
 import theirs from "../compare/renderers/theirs.js";
 import cathode from "../compare/renderers/cathode.js";
-import { lite, deluxe } from "../compare/renderers/zmbc.js";
+import { lite, deluxe } from "../compare/renderers/lowres.js";
 import { cathodeGl, cathodeFast } from "../compare/renderers/cathode-js.js";
 import { lottes, geom, easymode, royale } from "../compare/renderers/libretro.js";
 

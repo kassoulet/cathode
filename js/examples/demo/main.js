@@ -1,4 +1,4 @@
-import { createCRT, MASKS, PRESET_NAMES } from "../src/index.js";
+import { createCRT, MASKS, PRESET_NAMES } from "../../src/index.js";
 
 const canvas = document.querySelector("#crt");
 const status = document.querySelector("#status");

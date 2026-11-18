@@ -1,6 +1,6 @@
-// zmbc web player: "CRT-Lite" (one pass) and "CRT Deluxe" (lite → ghost accumulator → post).
+// lowres (from the zmbc web player): "CRT-Lite" (one pass) and "CRT Deluxe" (lite → ghost accumulator → post).
 // Shaders extracted verbatim; presets/params ported from shaders.ts and crt-deluxe.ts.
-import { CRT_VERTEX, NOFLIP_VERTEX, CRT_LITE_FRAGMENT, CRT_DELUXE_BLEND_FRAGMENT, CRT_DELUXE_POST_FRAGMENT } from "./zmbc-shaders.js";
+import { CRT_VERTEX, NOFLIP_VERTEX, CRT_LITE_FRAGMENT, CRT_DELUXE_BLEND_FRAGMENT, CRT_DELUXE_POST_FRAGMENT } from "./lowres-shaders.js";
 import { addGroup, select, commonButtons, program, fitCanvas, button } from "./ui.js";
 
 const LITE_PRESETS = {
@@ -99,8 +99,8 @@ function drawLite(g, prog, image, w, h, p, into) {
 }
 
 export const lite = {
-  id: "zmbc-lite",
-  label: "zmbc CRT-Lite",
+  id: "lowres-lite",
+  label: "lowres CRT-Lite",
   async create({ canvas, top, root, meta }) {
     const g = setup(canvas);
     const prog = program(g.gl, CRT_VERTEX, CRT_LITE_FRAGMENT);
@@ -112,7 +112,7 @@ export const lite = {
       (v) => { p.maskType = Number(v); });
     top.append(presetSelect, maskSelect,
       button("Reset", () => { p = { ...LITE_PRESETS[name] }; syncAll(); }),
-      ...commonButtons("zmbc-lite", canvas, () => ({ preset: name, ...p })));
+      ...commonButtons("lowres-lite", canvas, () => ({ preset: name, ...p })));
     syncers.push(addGroup(root, "CRT-Lite", LITE_RANGES.map(([key, min, max]) => ({
       label: key, min, max, step: 0.01, get: () => p[key], set: (v) => { p[key] = v; },
     })), true));
@@ -132,8 +132,8 @@ export const lite = {
 };
 
 export const deluxe = {
-  id: "zmbc-deluxe",
-  label: "zmbc CRT Deluxe",
+  id: "lowres-deluxe",
+  label: "lowres CRT Deluxe",
   async create({ canvas, top, root, meta }) {
     const g = setup(canvas);
     const { gl } = g;
@@ -151,7 +151,7 @@ export const deluxe = {
     });
     top.append(presetSelect,
       button("Reset", () => { s = deluxeState(s.id); syncAll(); }),
-      ...commonButtons("zmbc-deluxe", canvas, () => s));
+      ...commonButtons("lowres-deluxe", canvas, () => s));
     const rows = (keys, min = 0, max = 1) => keys.map((key) => ({
       label: key, min, max, step: 0.01, get: () => s[key], set: (v) => { s[key] = v; },
     }));

@@ -3,7 +3,7 @@ name: ci
 on:
   push:
     branches: [main]
-    tags: ['v*']
+    tags: ['v*']  # lib-v* tags are handled by publish.yml
   pull_request:
 
 permissions:
@@ -26,6 +26,8 @@ jobs:
           cache: npm
           cache-dependency-path: js/package-lock.json
       - run: npm ci
+        working-directory: js
+      - run: npm test && npm pack --dry-run
         working-directory: js
       - name: Pre-commit hooks (prek)
         uses: j178/prek-action@v1
